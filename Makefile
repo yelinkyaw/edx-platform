@@ -131,3 +131,18 @@ docker_push: docker_tag docker_auth ## push to docker hub
 	docker push "openedx/edx-platform:${GITHUB_SHA}"
 	docker push 'openedx/edx-platform:latest-newrelic'
 	docker push "openedx/edx-platform:${GITHUB_SHA}-newrelic"
+
+lint-imports: lint-imports-root lint-imports-common-lib
+
+lint-imports-root:
+	lint-imports
+
+lint-imports-common-lib: \
+	lint-imports-common-lib-capa \
+	lint-imports-common-lib-safe_lxml \
+	lint-imports-common-lib-sandbox-packages \
+	lint-imports-common-lib-symmath \
+	lint-imports-common-lib-xmodule
+
+lint-imports-common-lib-%:
+	cd common/lib/$* && lint-imports

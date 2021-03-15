@@ -656,6 +656,8 @@ gitpython==3.1.17
     #   transifex-client
 glob2==0.7
     # via -r requirements/edx/testing.txt
+grimp==1.2.3
+    # via import-linter
 gunicorn==20.1.0
     # via -r requirements/edx/testing.txt
 help-tokens==2.0.0
@@ -681,6 +683,8 @@ importlib-metadata==4.5.0
     #   -r requirements/edx/testing.txt
     #   inflect
     #   pytest-randomly
+grimp==1.2.3
+    # via import-linter
 inflect==3.0.2
     # via
     #   -c requirements/edx/../constraints.txt
@@ -855,6 +859,8 @@ mypy==0.902
     # via -r requirements/edx/development.in
 mysqlclient==2.0.3
     # via -r requirements/edx/testing.txt
+networkx==2.5
+    # via grimp
 newrelic==6.4.1.158
     # via
     #   -r requirements/edx/testing.txt
