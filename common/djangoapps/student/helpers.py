@@ -46,7 +46,6 @@ from lms.djangoapps.grades.api import CourseGradeFactory
 from lms.djangoapps.verify_student.models import VerificationDeadline
 from lms.djangoapps.verify_student.services import IDVerificationService
 from lms.djangoapps.verify_student.utils import is_verification_expiring_soon, verification_for_datetime
-from openedx.core.djangoapps.certificates.api import certificates_viewable_for_course
 from openedx.core.djangoapps.content.block_structure.exceptions import UsageKeyNotInBlockStructure
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming.helpers import get_themes
@@ -712,14 +711,17 @@ def get_resume_urls_for_enrollments(user, enrollments):
         try:
             block_key = get_key_to_last_completed_block(user, enrollment.course_id)
             try:
-                get_course_blocks(user, block_key)
+                block_data = get_course_blocks(user, block_key)
             except UsageKeyNotInBlockStructure:
                 url_to_block = ''
             else:
-                url_to_block = reverse(
-                    'jump_to',
-                    kwargs={'course_id': enrollment.course_id, 'location': block_key}
-                )
+                if block_key in block_data:
+                    url_to_block = reverse(
+                        'jump_to',
+                        kwargs={'course_id': enrollment.course_id, 'location': block_key}
+                    )
+                else:
+                    url_to_block = ''
         except UnavailableCompletionData:
             url_to_block = ''
         resume_course_urls[enrollment.course_id] = url_to_block
