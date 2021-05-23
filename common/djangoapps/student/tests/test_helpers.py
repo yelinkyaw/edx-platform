@@ -3,6 +3,7 @@
 
 import logging
 import unittest
+from collections import OrderedDict
 from unittest.mock import patch
 
 import ddt
@@ -13,8 +14,12 @@ from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from testfixtures import LogCapture
 
-from common.djangoapps.student.helpers import get_next_url_for_login_page
+from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
+from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
+from common.djangoapps.student.helpers import get_next_url_for_login_page, get_resume_urls_for_enrollments
 from openedx.core.djangoapps.site_configuration.tests.test_util import with_site_configuration_context
+from xmodule.modulestore.tests.factories import SampleCourseFactory
+from lms.djangoapps.course_blocks.transformers.tests.helpers import ModuleStoreTestCase
 
 LOGGER_NAME = "common.djangoapps.student.helpers"
 
@@ -154,3 +159,68 @@ class TestLoginHelper(TestCase):
             next_page = get_next_url_for_login_page(req)
 
         assert next_page == expected_url
+
+class TestResumeURLs(ModuleStoreTestCase):
+    """Test enrollment resume URL generation"""
+
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.course_1 = SampleCourseFactory.create()
+        self.course_2 = SampleCourseFactory.create()
+        self.enrollments = [
+            CourseEnrollmentFactory.create(user=self.user, course_id=self.course_1.id),
+            CourseEnrollmentFactory.create(user=self.user, course_id=self.course_2.id),
+        ]
+
+    def test_enrollments_no_completion(self):
+        """ Enrollments with no completion return empty string """
+        resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
+        expected = OrderedDict([
+            (self.course_1.id, ''),
+            (self.course_2.id, ''),
+        ])
+        self.assertEqual(resume_urls, expected)
+
+    @patch('common.djangoapps.student.helpers.get_key_to_last_completed_block')
+    def test_enrollment_with_completion(self, mock_last_completed_block):
+        """ Enrollment with completion data should return block URL """
+        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
+        mock_last_completed_block.return_value = problem_locator
+        resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
+        expected = OrderedDict([
+            (self.course_1.id, '/courses/org.0/course_0/Run_0/jump_to/i4x://org.0/course_0/problem/problem_x1a_1'),
+            (self.course_2.id, ''),
+        ])
+        self.assertEqual(resume_urls, expected)
+
+    @patch('common.djangoapps.student.helpers.get_key_to_last_completed_block')
+    def test_enrollment_with_completion_does_not_exist(self, mock_last_completed_block):
+        """
+        Enrollment with completion block that no longer exists
+        should return empty string
+        """
+        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_0')
+        mock_last_completed_block.return_value = problem_locator
+        resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
+        expected = OrderedDict([
+            (self.course_1.id, ''),
+            (self.course_2.id, ''),
+        ])
+        self.assertEqual(resume_urls, expected)
+
+    @patch('common.djangoapps.student.helpers.get_key_to_last_completed_block')
+    def test_enrollment_with_completion_inaccessible(self, mock_last_completed_block):
+        """
+        Enrollment with completion block that is not accessible
+        should return empty string
+        """
+        # TODO: create staff only block?
+        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
+        mock_last_completed_block.return_value = problem_locator
+        resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
+        expected = OrderedDict([
+            (self.course_1.id, ''),
+            (self.course_2.id, ''),
+        ])
+        self.assertEqual(resume_urls, expected)
