@@ -12,14 +12,14 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
+from opaque_keys.edx.locator import BlockUsageLocator
 from testfixtures import LogCapture
 
-from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
-from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
 from common.djangoapps.student.helpers import get_next_url_for_login_page, get_resume_urls_for_enrollments
+from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
+from lms.djangoapps.course_blocks.transformers.tests.helpers import ModuleStoreTestCase
 from openedx.core.djangoapps.site_configuration.tests.test_util import with_site_configuration_context
 from xmodule.modulestore.tests.factories import SampleCourseFactory
-from lms.djangoapps.course_blocks.transformers.tests.helpers import ModuleStoreTestCase
 
 LOGGER_NAME = "common.djangoapps.student.helpers"
 
@@ -160,6 +160,7 @@ class TestLoginHelper(TestCase):
 
         assert next_page == expected_url
 
+
 class TestResumeURLs(ModuleStoreTestCase):
     """Test enrollment resume URL generation"""
 
@@ -183,14 +184,15 @@ class TestResumeURLs(ModuleStoreTestCase):
         self.assertEqual(resume_urls, expected)
 
     @patch('common.djangoapps.student.helpers.get_key_to_last_completed_block')
-    def test_enrollment_with_completion(self, mock_last_completed_block):
+    def test_enrollments_with_completion(self, mock_last_completed_block):
         """ Enrollment with completion data should return block URL """
-        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
-        mock_last_completed_block.return_value = problem_locator
+        problem_locator_1 = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
+        problem_locator_2 = BlockUsageLocator(self.course_2.id, block_type='problem', block_id='problem_x1a_1')
+        mock_last_completed_block.side_effect = [problem_locator_1, problem_locator_2]
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         expected = OrderedDict([
             (self.course_1.id, '/courses/org.0/course_0/Run_0/jump_to/i4x://org.0/course_0/problem/problem_x1a_1'),
-            (self.course_2.id, ''),
+            (self.course_2.id, '/courses/org.1/course_1/Run_1/jump_to/i4x://org.1/course_1/problem/problem_x1a_1'),
         ])
         self.assertEqual(resume_urls, expected)
 
@@ -215,12 +217,15 @@ class TestResumeURLs(ModuleStoreTestCase):
         Enrollment with completion block that is not accessible
         should return empty string
         """
-        # TODO: create staff only block?
-        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
-        mock_last_completed_block.return_value = problem_locator
+        problem_locator_1 = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
+        problem_locator_2 = BlockUsageLocator(self.course_2.id, block_type='problem', block_id='problem_x1a_1')
+        problem_1 = self.store.get_item(problem_locator_1)
+        problem_1.visible_to_staff_only = True
+        self.store.update_item(problem_1, self.user.id)
+        mock_last_completed_block.side_effect = [problem_locator_1, problem_locator_2]
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         expected = OrderedDict([
             (self.course_1.id, ''),
-            (self.course_2.id, ''),
+            (self.course_2.id, '/courses/org.1/course_1/Run_1/jump_to/i4x://org.1/course_1/problem/problem_x1a_1'),
         ])
         self.assertEqual(resume_urls, expected)
