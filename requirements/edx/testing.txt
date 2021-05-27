@@ -472,7 +472,7 @@ edx-celeryutils==1.0.0
     # via
     #   -r requirements/edx/base.txt
     #   super-csv
-edx-completion==4.0.3
+edx-completion==4.0.4
     # via -r requirements/edx/base.txt
 edx-django-release-util==1.0.0
     # via -r requirements/edx/base.txt
