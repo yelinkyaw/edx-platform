@@ -18,8 +18,8 @@ from testfixtures import LogCapture
 
 from common.djangoapps.student.helpers import get_next_url_for_login_page, get_resume_urls_for_enrollments
 from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
-from lms.djangoapps.course_blocks.transformers.tests.helpers import ModuleStoreTestCase
 from openedx.core.djangoapps.site_configuration.tests.test_util import with_site_configuration_context
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import SampleCourseFactory
 
 LOGGER_NAME = "common.djangoapps.student.helpers"
