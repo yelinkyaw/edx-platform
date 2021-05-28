@@ -19,8 +19,8 @@ from testfixtures import LogCapture
 from common.djangoapps.student.helpers import get_next_url_for_login_page, get_resume_urls_for_enrollments
 from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
 from openedx.core.djangoapps.site_configuration.tests.test_util import with_site_configuration_context
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
-from xmodule.modulestore.tests.factories import SampleCourseFactory
+from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
+from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
 
 LOGGER_NAME = "common.djangoapps.student.helpers"
 
@@ -162,18 +162,36 @@ class TestLoginHelper(TestCase):
         assert next_page == expected_url
 
 
-class TestResumeURLs(ModuleStoreTestCase, CompletionWaffleTestMixin):
+class TestResumeURLs(SharedModuleStoreTestCase, CompletionWaffleTestMixin):
     """Test enrollment resume URL generation"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.course_1 = CourseFactory.create(course='course_1')
+        cls.course_2 = CourseFactory.create(course='course_2')
 
     def setUp(self):
         super().setUp()
         self.override_waffle_switch(True)
         self.user = UserFactory()
-        self.course_1 = SampleCourseFactory.create()
-        self.course_2 = SampleCourseFactory.create()
         self.enrollments = [
             CourseEnrollmentFactory.create(user=self.user, course_id=self.course_1.id),
             CourseEnrollmentFactory.create(user=self.user, course_id=self.course_2.id),
+        ]
+
+    def _course_problems(self, course):
+        return [
+            ItemFactory.create(
+                category='problem',
+                parent_location=course.location,
+                display_name='problem_1'
+            ).location,
+            ItemFactory.create(
+                category='problem',
+                parent_location=course.location,
+                display_name='problem_2'
+            ).location,
         ]
 
     def test_enrollments_no_completion(self):
@@ -187,35 +205,36 @@ class TestResumeURLs(ModuleStoreTestCase, CompletionWaffleTestMixin):
 
     def test_enrollments_with_completion(self):
         """ Enrollment with completion data should return block URL """
-        problem_locator_1 = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
-        problem_locator_2 = BlockUsageLocator(self.course_2.id, block_type='problem', block_id='problem_y1a_2')
-        submit_completions_for_testing(self.user, [problem_locator_1, problem_locator_2])
+        course_1_problem_blocks = self._course_problems(self.course_1)
+        course_2_problem_blocks = self._course_problems(self.course_2)
+        submit_completions_for_testing(self.user, course_1_problem_blocks + course_2_problem_blocks)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
-        self.assertIn('problem_x1a_1', resume_urls[self.course_1.id])
-        self.assertIn('problem_y1a_2', resume_urls[self.course_2.id])
+        self.assertIn('course_1/problem/problem_2', resume_urls[self.course_1.id])
+        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
 
     def test_enrollment_with_completion_does_not_exist(self):
         """
         Enrollment with completion block that no longer exists
         should return empty string
         """
-        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_0')
-        submit_completions_for_testing(self.user, [problem_locator])
+        problem_locator = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_dne')
+        course_2_problem_blocks = self._course_problems(self.course_2)
+        submit_completions_for_testing(self.user, [problem_locator] + course_2_problem_blocks)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         self.assertIn('', resume_urls[self.course_1.id])
-        self.assertIn('', resume_urls[self.course_2.id])
+        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
 
     def test_enrollment_with_completion_inaccessible(self):
         """
         Enrollment with completion block that is not accessible
         should return empty string
         """
-        problem_locator_1 = BlockUsageLocator(self.course_1.id, block_type='problem', block_id='problem_x1a_1')
-        problem_locator_2 = BlockUsageLocator(self.course_2.id, block_type='problem', block_id='problem_y1a_2')
-        submit_completions_for_testing(self.user, [problem_locator_1, problem_locator_2])
-        problem_1 = self.store.get_item(problem_locator_1)
-        problem_1.visible_to_staff_only = True
-        self.store.update_item(problem_1, self.user.id)
+        course_1_problem_blocks = self._course_problems(self.course_1)
+        course_2_problem_blocks = self._course_problems(self.course_2)
+        submit_completions_for_testing(self.user, course_1_problem_blocks + course_2_problem_blocks)
+        staff_problem = self.store.get_item(course_1_problem_blocks[-1])
+        staff_problem.visible_to_staff_only = True
+        self.store.update_item(staff_problem, self.user.id)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         self.assertIn('', resume_urls[self.course_1.id])
-        self.assertIn('problem_y1a_2', resume_urls[self.course_2.id])
+        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
