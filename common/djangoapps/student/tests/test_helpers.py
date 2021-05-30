@@ -168,8 +168,8 @@ class TestResumeURLs(SharedModuleStoreTestCase, CompletionWaffleTestMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.course_1 = CourseFactory.create(course='course_1')
-        cls.course_2 = CourseFactory.create(course='course_2')
+        cls.course_1 = CourseFactory.create(course='resume_course_1')
+        cls.course_2 = CourseFactory.create(course='resume_course_2')
 
     def setUp(self):
         super().setUp()
@@ -209,8 +209,8 @@ class TestResumeURLs(SharedModuleStoreTestCase, CompletionWaffleTestMixin):
         course_2_problem_blocks = self._course_problems(self.course_2)
         submit_completions_for_testing(self.user, course_1_problem_blocks + course_2_problem_blocks)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
-        self.assertIn('course_1/problem/problem_2', resume_urls[self.course_1.id])
-        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
+        self.assertIn('resume_course_1/problem/problem_2', resume_urls[self.course_1.id])
+        self.assertIn('resume_course_2/problem/problem_2', resume_urls[self.course_2.id])
 
     def test_enrollment_with_completion_does_not_exist(self):
         """
@@ -237,4 +237,4 @@ class TestResumeURLs(SharedModuleStoreTestCase, CompletionWaffleTestMixin):
         self.store.update_item(staff_problem, self.user.id)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         self.assertIn('', resume_urls[self.course_1.id])
-        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
+        self.assertIn('resume_course_2/problem/problem_2', resume_urls[self.course_2.id])
