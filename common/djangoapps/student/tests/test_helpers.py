@@ -222,7 +222,7 @@ class TestResumeURLs(SharedModuleStoreTestCase, CompletionWaffleTestMixin):
         submit_completions_for_testing(self.user, [problem_locator] + course_2_problem_blocks)
         resume_urls = get_resume_urls_for_enrollments(self.user, self.enrollments)
         self.assertIn('', resume_urls[self.course_1.id])
-        self.assertIn('course_2/problem/problem_2', resume_urls[self.course_2.id])
+        self.assertIn('resume_course_2/problem/problem_2', resume_urls[self.course_2.id])
 
     def test_enrollment_with_completion_inaccessible(self):
         """
