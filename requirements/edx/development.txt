@@ -180,6 +180,8 @@ code-annotations==1.2.0
     #   edx-enterprise
     #   edx-lint
     #   edx-toggles
+confluent-kafka==1.7.0
+    # via -r requirements/edx/testing.txt
 contextlib2==21.6.0
     # via -r requirements/edx/testing.txt
 coreapi==2.3.3
@@ -988,7 +990,6 @@ platformdirs==2.3.0
     #   virtualenv
 pluggy==0.13.1
     # via
-    #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   -r requirements/edx/testing.txt
     #   diff-cover
     #   pytest
@@ -1551,6 +1552,7 @@ wrapt==1.11.2
     #   -c requirements/edx/../constraints.txt
     #   -r requirements/edx/testing.txt
     #   astroid
+    #   deprecated
 xblock==1.5.0
     # via
     #   -r requirements/edx/testing.txt

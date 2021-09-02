@@ -128,6 +128,8 @@ code-annotations==1.2.0
     # via
     #   edx-enterprise
     #   edx-toggles
+confluent-kafka==1.7.0
+    # via -r requirements/edx/base.in
 contextlib2==21.6.0
     # via -r requirements/edx/base.in
 coreapi==2.3.3
@@ -1076,6 +1078,7 @@ wrapt==1.11.2
     # via
     #   -c requirements/edx/../constraints.txt
     #   -r requirements/edx/paver.txt
+    #   deprecated
 xblock==1.5.0
     # via
     #   -r requirements/edx/base.in
