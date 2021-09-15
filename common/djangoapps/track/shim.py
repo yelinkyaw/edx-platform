@@ -85,6 +85,15 @@ class GoogleAnalyticsProcessor:
         copied_event = event.copy()
         if course_id is not None:
             copied_event['label'] = course_id
+            # TODO: we could add this here all the time, or we could
+            # use opaque_keys to parse it, to make sure it's a course run
+            # and not a library or something.
+            # We could also move this instead to the LegacyFieldMappingProcessor,
+            # since it's not really related to GA but something we would want
+            # in general.  But the LegacyFieldMappingProcessor does not touch the
+            # data at all.
+            # Also, should this include org_id?  Not sure that we should trust it.
+            copied_event['courserun_key'] = course_id
 
         copied_event['nonInteraction'] = 1
 
