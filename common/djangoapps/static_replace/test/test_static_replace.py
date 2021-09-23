@@ -61,7 +61,7 @@ def test_multi_replace():
 
 
 def test_process_url():
-    def processor(__, prefix, quote, rest):
+    def processor(__, prefix, quote, rest):  # pylint: disable=redefined-outer-name
         return quote + 'test' + prefix + rest + quote
 
     assert process_static_urls(STATIC_SOURCE, processor) == '"test/static/file.png"'
@@ -70,7 +70,7 @@ def test_process_url():
 def test_process_url_data_dir_exists():
     base = f'"/static/{DATA_DIRECTORY}/file.png"'
 
-    def processor(original, prefix, quote, rest):  # pylint: disable=unused-argument
+    def processor(original, prefix, quote, rest):  # pylint: disable=unused-argument, redefined-outer-name
         return quote + 'test' + rest + quote
 
     assert process_static_urls(base, processor, data_dir=DATA_DIRECTORY) == base
@@ -78,7 +78,7 @@ def test_process_url_data_dir_exists():
 
 def test_process_url_no_match():
 
-    def processor(__, prefix, quote, rest):
+    def processor(__, prefix, quote, rest):  # pylint: disable=redefined-outer-name
         return quote + 'test' + prefix + rest + quote
 
     assert process_static_urls(STATIC_SOURCE, processor) == '"test/static/file.png"'
