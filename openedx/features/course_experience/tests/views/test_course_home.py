@@ -371,7 +371,7 @@ class TestCourseHomePageAccess(CourseHomePageTestCase):
         """
         url = course_home_url(self.course)
         response = self.client.get(url)
-        self.assertContains(response, f'/login?next={urlquote_plus(url)}')
+        self.assertContains(response, f'/login?next={quote_plus(url)}')
 
     @mock.patch.dict(settings.FEATURES, {'DISABLE_START_DATES': False})
     def test_non_live_course(self):
