@@ -38,8 +38,9 @@ class ContentTypeGatingConfig(StackedConfigurationModel):
         help_text=_(
             'Allow Feature Based Enrollment visibility to be overriden '
             'on a per-component basis in Studio.'
-        )
-    , null=True)
+        ),
+        null=True
+    )
 
     @classmethod
     def enabled_for_enrollment(cls, user=None, course_key=None):
