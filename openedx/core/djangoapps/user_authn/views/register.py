@@ -589,7 +589,7 @@ class RegistrationView(APIView):
                 accounts_settings.USERNAME_CONFLICT_MSG.format(username=username)
             )
             errors['username'] = [{'user_message': error_message}]
-            errors['username_suggestions'] = generate_username_suggestions(username)
+            errors['username_suggestions'] = generate_username_suggestions(data.get('name'))
 
         if errors:
             return self._create_response(request, errors, status_code=409, error_code=error_code)
@@ -759,6 +759,7 @@ class RegistrationValidationView(APIView):
     def name_handler(self, request):
         """ Validates whether fullname is valid """
         name = request.data.get('name')
+        self.username_suggestions = generate_username_suggestions(name)
         return get_name_validation_error(name)
 
     def username_handler(self, request):
