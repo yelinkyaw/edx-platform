@@ -16,6 +16,6 @@ urlpatterns = [
         name='courseenrollment-detail'
     ),
     re_path(f'^{settings.USERNAME_PATTERN}/course_status_info/{settings.COURSE_ID_PATTERN}',
-        UserCourseStatus.as_view(),
-        name='user-course-status')
+            UserCourseStatus.as_view(),
+            name='user-course-status')
 ]

@@ -45,7 +45,8 @@ urlpatterns = [
         FeatureBasedEnrollmentSupportAPIView.as_view(),
         name="feature_based_enrollment_details"
     ),
-    re_path(r'link_program_enrollments/?$', LinkProgramEnrollmentSupportView.as_view(), name='link_program_enrollments'),
+    re_path(r'link_program_enrollments/?$', LinkProgramEnrollmentSupportView.as_view(),
+            name='link_program_enrollments'),
     re_path(
         r'program_enrollments_inspector/?$',
         ProgramEnrollmentsInspectorView.as_view(),
