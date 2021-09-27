@@ -4,7 +4,7 @@ URLs for LMS
 
 from config_models.views import ConfigurationModelCurrentAPIView
 from django.conf import settings
-from django.urls import include, path, re_path
+from django.urls import include, re_path
 from django.conf.urls.static import static
 from django.contrib.admin import autodiscover as django_autodiscover
 from django.urls import path
