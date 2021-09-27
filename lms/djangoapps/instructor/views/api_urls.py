@@ -16,7 +16,7 @@ v1_api_urls = [
     re_path(rf'^tasks/{COURSE_ID_PATTERN}$', api.InstructorTasks.as_view(), name='list_instructor_tasks', ),
     re_path(rf'^reports/{COURSE_ID_PATTERN}$', api.ReportDownloads.as_view(), name='list_report_downloads', ),
     re_path(rf'^reports/{COURSE_ID_PATTERN}/generate/problem_responses$', api.ProblemResponseReportInitiate.as_view(),
-        name='generate_problem_responses', ),
+            name='generate_problem_responses', ),
 ]
 
 urlpatterns = [
@@ -37,12 +37,12 @@ urlpatterns = [
     path('rescore_problem', api.rescore_problem, name='rescore_problem'),
     path('override_problem_score', api.override_problem_score, name='override_problem_score'),
     path('reset_student_attempts_for_entrance_exam', api.reset_student_attempts_for_entrance_exam,
-        name='reset_student_attempts_for_entrance_exam'),
+         name='reset_student_attempts_for_entrance_exam'),
     path('rescore_entrance_exam', api.rescore_entrance_exam, name='rescore_entrance_exam'),
     path('list_entrance_exam_instructor_tasks', api.list_entrance_exam_instructor_tasks,
-        name='list_entrance_exam_instructor_tasks'),
+         name='list_entrance_exam_instructor_tasks'),
     path('mark_student_can_skip_entrance_exam', api.mark_student_can_skip_entrance_exam,
-        name='mark_student_can_skip_entrance_exam'),
+         name='mark_student_can_skip_entrance_exam'),
     path('list_instructor_tasks', api.list_instructor_tasks, name='list_instructor_tasks'),
     path('list_background_email_tasks', api.list_background_email_tasks, name='list_background_email_tasks'),
     path('list_email_content', api.list_email_content, name='list_email_content'),
@@ -68,7 +68,7 @@ urlpatterns = [
     path('export_ora2_summary', api.export_ora2_summary, name='export_ora2_summary'),
 
     path('export_ora2_submission_files', api.export_ora2_submission_files,
-        name='export_ora2_submission_files'),
+         name='export_ora2_submission_files'),
 
     # spoc gradebook
     path('gradebook', gradebook_api.spoc_gradebook, name='spoc_gradebook'),
@@ -84,8 +84,8 @@ urlpatterns = [
     path('start_certificate_regeneration', api.start_certificate_regeneration, name='start_certificate_regeneration'),
     path('certificate_exception_view/', api.certificate_exception_view, name='certificate_exception_view'),
     re_path(r'^generate_certificate_exceptions/(?P<generate_for>[^/]*)', api.generate_certificate_exceptions,
-        name='generate_certificate_exceptions'),
+            name='generate_certificate_exceptions'),
     path('generate_bulk_certificate_exceptions', api.generate_bulk_certificate_exceptions,
-        name='generate_bulk_certificate_exceptions'),
+         name='generate_bulk_certificate_exceptions'),
     path('certificate_invalidation_view/', api.certificate_invalidation_view, name='certificate_invalidation_view'),
 ]

@@ -163,7 +163,7 @@ urlpatterns = [
     path('api/organizations/', include('organizations.urls', namespace='organizations')),
 
     path('catalog/', include(('openedx.core.djangoapps.catalog.urls', 'openedx.core.djangoapps.catalog'),
-                              namespace='catalog')),
+                             namespace='catalog')),
 
     # Update session view
     path('lang_pref/session_language', lang_pref_views.update_session_language, name='session_language'),
@@ -185,14 +185,14 @@ urlpatterns = [
 
     # URLs for managing dark launches of languages
     path('update_lang/', include(('openedx.core.djangoapps.dark_lang.urls', 'openedx.core.djangoapps.dark_lang'),
-                                  namespace='dark_lang')),
+                                 namespace='dark_lang')),
 
     # For redirecting to help pages.
     path('help_token/', include('help_tokens.urls')),
 
     # URLs for API access management
     path('api-admin/', include(('openedx.core.djangoapps.api_admin.urls', 'openedx.core.djangoapps.api_admin'),
-                                namespace='api_admin')),
+                               namespace='api_admin')),
 
     path('dashboard/', include('lms.djangoapps.learner_dashboard.urls')),
     path(
@@ -203,7 +203,7 @@ urlpatterns = [
         ),
     ),
     path('api/discounts/', include(('openedx.features.discounts.urls', 'openedx.features.discounts'),
-                                    namespace='api_discounts')),
+                                   namespace='api_discounts')),
     path('403', handler403),
     path('404', handler404),
     path('429', handler429),
@@ -254,9 +254,9 @@ if settings.WIKI_ENABLED:
         # These urls are for viewing the wiki in the context of a course. They should
         # never be returned by a reverse() so they come after the other url patterns
         re_path(fr'^courses/{settings.COURSE_ID_PATTERN}/course_wiki/?$',
-            course_wiki_views.course_wiki_redirect, name='course_wiki'),
+                course_wiki_views.course_wiki_redirect, name='course_wiki'),
         re_path(fr'^courses/{settings.COURSE_KEY_REGEX}/wiki/',
-            include((wiki_url_patterns, 'course_wiki_do_not_reverse'), namespace='course_wiki_do_not_reverse')),
+                include((wiki_url_patterns, 'course_wiki_do_not_reverse'), namespace='course_wiki_do_not_reverse')),
     ]
 
 urlpatterns += [
@@ -810,16 +810,16 @@ if configuration_helpers.get_value('ENABLE_BULK_ENROLLMENT_VIEW', settings.FEATU
 # Course goals
 urlpatterns += [
     path('api/course_goals/', include(('lms.djangoapps.course_goals.urls', 'lms.djangoapps.course_goals'),
-                                       namespace='course_goals_api')),
+                                      namespace='course_goals_api')),
 ]
 
 # Embargo
 if settings.FEATURES.get('EMBARGO'):
     urlpatterns += [
         path('embargo/', include(('openedx.core.djangoapps.embargo.urls', 'openedx.core.djangoapps.embargo'),
-                                  namespace='embargo')),
+                                 namespace='embargo')),
         path('api/embargo/', include(('openedx.core.djangoapps.embargo.urls', 'openedx.core.djangoapps.embargo'),
-                                      namespace='api_embargo')),
+                                     namespace='api_embargo')),
     ]
 
 # Survey Djangoapp
@@ -889,9 +889,8 @@ urlpatterns += [
     path('certificates/', include('lms.djangoapps.certificates.urls')),
 
     # REST APIs
-    path('api/certificates/',
-        include(('lms.djangoapps.certificates.apis.urls', 'lms.djangoapps.certificates'),
-                namespace='certificates_api')),
+    path('api/certificates/', include(('lms.djangoapps.certificates.apis.urls', 'lms.djangoapps.certificates'),
+                                      namespace='certificates_api')),
 ]
 
 # XDomain proxy
@@ -902,8 +901,7 @@ urlpatterns += [
 # Custom courses on edX (CCX) URLs
 if settings.FEATURES.get('CUSTOM_COURSES_EDX'):
     urlpatterns += [
-        re_path(fr'^courses/{settings.COURSE_ID_PATTERN}/',
-            include('lms.djangoapps.ccx.urls')),
+        re_path(fr'^courses/{settings.COURSE_ID_PATTERN}/', include('lms.djangoapps.ccx.urls')),
         path('api/ccx/', include(('lms.djangoapps.ccx.api.urls', 'lms.djangoapps.ccx'), namespace='ccx_api')),
     ]
 
