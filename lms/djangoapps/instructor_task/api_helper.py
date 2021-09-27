@@ -12,7 +12,7 @@ import logging
 
 from celery.result import AsyncResult
 from celery.states import FAILURE, READY_STATES, REVOKED, SUCCESS
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from opaque_keys.edx.keys import UsageKey
 
 from common.djangoapps.util.db import outer_atomic
@@ -138,7 +138,7 @@ def _get_xmodule_instance_args(request, task_id):
     request_info = {'username': request.user.username,
                     'user_id': request.user.id,
                     'ip': request.META['REMOTE_ADDR'],
-                    'agent': request.META.get('HTTP_USER_AGENT', '').encode().decode('latin1'),
+                    'agent': request.headers.get('User-Agent', '').encode().decode('latin1'),
                     'host': request.META['SERVER_NAME'],
                     }
 

@@ -16,8 +16,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.utils.translation import ugettext as _
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic.base import View
@@ -143,12 +143,12 @@ class PayAndVerifyView(View):
     ]
 
     STEP_TITLES = {
-        INTRO_STEP: ugettext_lazy("Intro"),
-        MAKE_PAYMENT_STEP: ugettext_lazy("Make payment"),
-        FACE_PHOTO_STEP: ugettext_lazy("Take photo"),
-        ID_PHOTO_STEP: ugettext_lazy("Take a photo of your ID"),
-        REVIEW_PHOTOS_STEP: ugettext_lazy("Review your info"),
-        ENROLLMENT_CONFIRMATION_STEP: ugettext_lazy("Enrollment confirmation"),
+        INTRO_STEP: gettext_lazy("Intro"),
+        MAKE_PAYMENT_STEP: gettext_lazy("Make payment"),
+        FACE_PHOTO_STEP: gettext_lazy("Take photo"),
+        ID_PHOTO_STEP: gettext_lazy("Take a photo of your ID"),
+        REVIEW_PHOTOS_STEP: gettext_lazy("Review your info"),
+        ENROLLMENT_CONFIRMATION_STEP: gettext_lazy("Enrollment confirmation"),
     }
 
     # Messages
@@ -1107,8 +1107,8 @@ def results_callback(request):  # lint-amnesty, pylint: disable=too-many-stateme
         return HttpResponseBadRequest(f"JSON should be dict. Received:\n\n{body}")
 
     headers = {
-        "Authorization": request.META.get("HTTP_AUTHORIZATION", ""),
-        "Date": request.META.get("HTTP_DATE", "")
+        "Authorization": request.headers.get('Authorization', ""),
+        "Date": request.headers.get('Date', "")
     }
 
     _response, access_key_and_sig = headers["Authorization"].split(" ")
