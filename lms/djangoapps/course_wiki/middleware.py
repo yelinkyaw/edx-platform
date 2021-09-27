@@ -29,7 +29,7 @@ class WikiAccessMiddleware(MiddlewareMixin):
         """
         redirect to course wiki url if the referrer is from a course page
         """
-        course_id = course_id_from_url(request.META.get('HTTP_REFERER'))
+        course_id = course_id_from_url(request.headers.get('Referer'))
         if course_id:
             # See if we are able to view the course. If we are, redirect to it
             try:

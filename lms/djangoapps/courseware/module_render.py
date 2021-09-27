@@ -385,7 +385,7 @@ def get_xqueue_callback_url_prefix(request):
     should go back to the LMS, not to the worker.
     """
     prefix = '{proto}://{host}'.format(
-        proto=request.META.get('HTTP_X_FORWARDED_PROTO', 'https' if request.is_secure() else 'http'),
+        proto=request.headers.get('X-Forwarded-Proto', 'https' if request.is_secure() else 'http'),
         host=request.get_host()
     )
     return settings.XQUEUE_INTERFACE.get('callback_url', prefix)

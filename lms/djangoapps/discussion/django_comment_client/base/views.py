@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User  # lint-amnesty, pylint: disable=imported-auth-user
 from django.core import exceptions
 from django.http import Http404, HttpResponse, HttpResponseServerError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.decorators import csrf
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -83,7 +83,7 @@ def track_forum_event(request, event_name, course, obj, data, id_map=None):
     if commentable_id in id_map:
         data['category_name'] = id_map[commentable_id]["title"]
         data['category_id'] = commentable_id
-    data['url'] = request.META.get('HTTP_REFERER', '')
+    data['url'] = request.headers.get('Referer', '')
     data['user_forums_roles'] = [
         role.name for role in user.roles.filter(course_id=course.id)
     ]
