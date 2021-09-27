@@ -979,8 +979,8 @@ class CertificateGenerationCourseSetting(TimeStampedModel):
             "times the length of the course in weeks. This attribute will only be displayed in a certificate when the "
             "attributes 'Weeks to complete' and 'Max effort' have been provided for the course run and its "
             "certificate template includes Hours of Effort."
-        )
-    , null=True)
+        ),
+        null=True)
 
     class Meta:
         get_latest_by = 'created'

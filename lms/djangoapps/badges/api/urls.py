@@ -9,5 +9,6 @@ from django.urls import re_path
 from .views import UserBadgeAssertions
 
 urlpatterns = [
-    re_path('^assertions/user/' + settings.USERNAME_PATTERN + '/$', UserBadgeAssertions.as_view(), name='user_assertions'),
+    re_path('^assertions/user/' + settings.USERNAME_PATTERN + '/$',
+            UserBadgeAssertions.as_view(), name='user_assertions'),
 ]
