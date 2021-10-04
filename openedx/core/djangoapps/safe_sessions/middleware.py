@@ -78,6 +78,8 @@ from django.core import signing
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from django.utils.deprecation import MiddlewareMixin
+from django.core.cache import cache
+
 
 from edx_django_utils.monitoring import set_custom_attribute
 
@@ -86,13 +88,15 @@ from openedx.core.lib.mobile_utils import is_request_from_mobile_app
 # .. toggle_name: LOG_REQUEST_USER_CHANGES
 # .. toggle_implementation: SettingToggle
 # .. toggle_default: False
-# .. toggle_description: Turn this toggle on to log anytime the `user` attribute of the request object gets
-#   changed.  This will also log the location where the change is coming from to quickly find issues.
-# .. toggle_warnings: This logging will be very verbose and so should probably not be left on all the time.
+# .. toggle_description: Turn this toggle on to enable temporary logging anytime the `user` attribute of the request
+#    object gets changed after a mismatch incident. This will also log the location where the change is coming from to
+#    quickly find issues.
+# .. toggle_warnings: This logging may be very verbose and so should probably not be left on all the time.
 # .. toggle_use_cases: opt_in
 # .. toggle_creation_date: 2021-03-25
 # .. toggle_tickets: https://openedx.atlassian.net/browse/ARCHBOM-1718
-LOG_REQUEST_USER_CHANGES = getattr(settings, 'LOG_REQUEST_USER_CHANGES', False)
+LOG_REQUEST_USER_CHANGES = getattr(settings, 'LOG_REQUEST_USER_CHANGES', True)
+USER_MISMATCH_CACHE_KEY = 'SafeSessionUserMismatchDetected'
 
 log = getLogger(__name__)
 
@@ -310,7 +314,8 @@ class SafeSessionMiddleware(SessionMiddleware, MiddlewareMixin):
             user_id = self.get_user_id_from_session(request)
             if safe_cookie_data.verify(user_id):  # Step 4
                 request.safe_cookie_verified_user_id = user_id  # Step 5
-                if LOG_REQUEST_USER_CHANGES:
+                request.safe_cookie_session_id = safe_cookie_data.session_id
+                if cache.get(USER_MISMATCH_CACHE_KEY, False) and LOG_REQUEST_USER_CHANGES:
                     log_request_user_changes(request)
             else:
                 return self._on_user_authentication_failed(request)
@@ -340,6 +345,7 @@ class SafeSessionMiddleware(SessionMiddleware, MiddlewareMixin):
         Step 4. Delete the cookie, if it's marked for deletion.
 
         """
+
         response = super().process_response(request, response)  # Step 1
 
         if not _is_cookie_marked_for_deletion(request) and _is_cookie_present(response):
@@ -385,34 +391,45 @@ class SafeSessionMiddleware(SessionMiddleware, MiddlewareMixin):
         given userid_in_session.
         """
         if hasattr(request, 'safe_cookie_verified_user_id'):
+            mismatch = False
             if hasattr(request.user, 'real_user'):
                 # If a view overrode the request.user with a masqueraded user, this will
                 #   revert/clean-up that change during response processing.
                 request.user = request.user.real_user
+            session_at_response = 'None'
+            if hasattr(request, 'session') and hasattr(request.session, 'session_key'):
+                session_at_response = request.session.session_key
             # The user at response time is expected to be None when the user
             # is logging out.  We won't log that.
             if request.safe_cookie_verified_user_id != request.user.id and request.user.id is not None:
                 log.warning(
                     (
                         "SafeCookieData user at request '{}' does not match user at response: '{}' "
-                        "for request path '{}'"
+                        "for request path '{}'. Session id at request is {}; session id at response is {}"
                     ).format(  # pylint: disable=logging-format-interpolation
                         request.safe_cookie_verified_user_id, request.user.id, request.path,
+                        request.safe_cookie_session_id, session_at_response,
                     ),
                 )
                 set_custom_attribute("safe_sessions.user_mismatch", "request-response-mismatch")
+                mismatch = True
             # The user session at response time is expected to be None when the user
             # is logging out.  We won't log that.
             if request.safe_cookie_verified_user_id != userid_in_session and userid_in_session is not None:
                 log.warning(
                     (
                         "SafeCookieData user at request '{}' does not match user in session: '{}' "
-                        "for request path '{}'"
+                        "for request path '{}'. Session id at request is {}; session id at response is {}"
                     ).format(  # pylint: disable=logging-format-interpolation
                         request.safe_cookie_verified_user_id, userid_in_session, request.path,
+                        request.safe_cookie_session_id, session_at_response
                     ),
                 )
                 set_custom_attribute("safe_sessions.user_mismatch", "request-session-mismatch")
+                mismatch = True
+            if mismatch:
+                if not cache.touch(USER_MISMATCH_CACHE_KEY, 300):
+                    cache.set(USER_MISMATCH_CACHE_KEY, True, 300)
 
     @staticmethod
     def get_user_id_from_session(request):

@@ -115,7 +115,8 @@ class TestSafeSessionsLogMixin:
             yield
 
     @contextmanager
-    def assert_logged_for_request_user_mismatch(self, user_at_request, user_at_response, log_level, request_path):
+    def assert_logged_for_request_user_mismatch(self, user_at_request, user_at_response, log_level, request_path,
+                                                session_id_at_request, session_id):
         """
         Asserts that warning was logged when request.user
         was not equal to user at response
@@ -123,16 +124,17 @@ class TestSafeSessionsLogMixin:
         with self.assert_logged_with_message(
             (
                 "SafeCookieData user at request '{}' does not match user at response: '{}' "
-                "for request path '{}'"
+                "for request path '{}'. Session id at request is {}; session id at response is {}"
             ).format(
-                user_at_request, user_at_response, request_path
+                user_at_request, user_at_response, request_path, session_id_at_request, session_id
             ),
             log_level=log_level,
         ):
             yield
 
     @contextmanager
-    def assert_logged_for_session_user_mismatch(self, user_at_request, user_in_session, request_path):
+    def assert_logged_for_session_user_mismatch(self, user_at_request, user_in_session, request_path,
+                                                session_id_at_request, session_id):
         """
         Asserts that warning was logged when request.user
         was not equal to user at session
@@ -140,9 +142,9 @@ class TestSafeSessionsLogMixin:
         with self.assert_logged_with_message(
             (
                 "SafeCookieData user at request '{}' does not match user in session: '{}' "
-                "for request path '{}'"
+                "for request path '{}'. Session id at request is {}; session id at response is {}"
             ).format(
-                user_at_request, user_in_session, request_path
+                user_at_request, user_in_session, request_path, session_id_at_request, session_id
             ),
             log_level='warning',
         ):
