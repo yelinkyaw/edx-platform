@@ -588,6 +588,7 @@ def log_request_user_changes(request):
     request.__class__ = SafeSessionRequestWrapper
 
 
+# TODO: See if we can get rid of this
 def _is_from_logout(request):
     """
     Returns whether the request has come from logout action to see if
