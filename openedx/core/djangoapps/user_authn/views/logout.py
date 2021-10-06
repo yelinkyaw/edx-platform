@@ -11,6 +11,7 @@ from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from oauth2_provider.models import Application
 
+from openedx.core.djangoapps.safe_sessions.middleware import mark_user_change_as_expected
 from openedx.core.djangoapps.user_authn.cookies import delete_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import is_safe_login_or_logout_redirect
 from common.djangoapps.third_party_auth import pipeline as tpa_pipeline
@@ -74,6 +75,7 @@ class LogoutView(TemplateView):
         self.tpa_logout_url = tpa_pipeline.get_idp_logout_url_from_running_pipeline(request)
 
         logout(request)
+        mark_user_change_as_expected(request, None)
 
         response = super().dispatch(request, *args, **kwargs)
 

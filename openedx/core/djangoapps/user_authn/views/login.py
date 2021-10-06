@@ -41,6 +41,7 @@ from common.djangoapps.track import segment
 from common.djangoapps.util.json_request import JsonResponse
 from common.djangoapps.util.password_policy_validators import normalize_password
 from openedx.core.djangoapps.password_policy import compliance as password_policy_compliance
+from openedx.core.djangoapps.safe_sessions.middleware import mark_user_change_as_expected
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_authn.config.waffle import ENABLE_LOGIN_USING_THIRDPARTY_AUTH_ONLY
 from openedx.core.djangoapps.user_authn.cookies import get_response_with_refreshed_jwt_cookies, set_logged_in_cookies
@@ -301,6 +302,7 @@ def _handle_successful_authentication_and_login(user, request):
         django_login(request, user)
         request.session.set_expiry(604800 * 4)
         log.debug("Setting user session expiry to 4 weeks")
+        mark_user_change_as_expected(request, user.id)
 
         # Announce user's login
         SESSION_LOGIN_COMPLETED.send_event(
