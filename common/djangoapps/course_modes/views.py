@@ -300,7 +300,8 @@ class ChooseModeView(View):
 
         allowed_modes = CourseMode.modes_for_course_dict(course_key)
         if requested_mode not in allowed_modes:
-            return HttpResponseBadRequest(_("Enrollment mode not supported"))
+            error_msg = _("Enrollment mode not supported")
+            return self.get(request, course_id, error=error_msg)
 
         if requested_mode == 'audit':
             # If the learner has arrived at this screen via the traditional enrollment workflow,
